@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"text/template"
 
 	"github.com/toleubekov/snippetBox/pkg/models"
 )
@@ -57,8 +58,20 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
-
-	fmt.Fprintf(w, "%v", s)
+	files := []string{
+		"./ui/html/show.page.tmpl",
+		"./ui/html/base.layout.tmpl",
+		"./ui/html/footer.partial.tmpl",
+	}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	err = ts.Execute(w, s)
+	if err != nil {
+		app.serverError(w, err)
+	}
 
 }
 
