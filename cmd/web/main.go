@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -41,6 +42,10 @@ func main() {
 
 	defer db.Close()
 
+	tlsConfig := tls.Config{
+		PreferServerCipherSuites: true,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
 	session := sessions.New([]byte(*secret))
 	session.Lifetime = 12 * time.Hour
 	templateCache, err := newTemplateCache("./ui/html")
@@ -56,9 +61,13 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+		Addr:         *addr,
+		ErrorLog:     errorLog,
+		Handler:      app.routes(),
+		TLSConfig:    &tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  time.Second * 5,
+		WriteTimeout: time.Second * 10,
 	}
 	infoLog.Printf("Starting server on a %v", *addr)
 
