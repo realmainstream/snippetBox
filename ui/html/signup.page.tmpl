@@ -1,10 +1,10 @@
-{{template base .}}
+{{template "base" .}}
 
 {{define "title"}}Signup{{end}}
 
 {{define "body"}}
 
-<form action='user/signup' method='POST' novalidate>
+<form action='/user/signup' method='POST' novalidate>
     {{with .Form}}
 
         <div>
